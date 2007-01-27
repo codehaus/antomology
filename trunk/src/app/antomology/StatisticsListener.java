@@ -1,87 +1,64 @@
 package antomology;
 
-import java.util.Date;
-
 import org.apache.tools.ant.BuildEvent;
 import org.apache.tools.ant.SubBuildListener;
 
 public class StatisticsListener implements SubBuildListener {
 
-	private final Duration buildDuration;
-
-	private final SeriesMap targetSeriesMap;
-
-	private final SeriesMap taskSeriesMap;
+	private final Build build;
 
 	public StatisticsListener() {
-		this(new Duration(), new SeriesMap(), new SeriesMap());
+		this(new Build("main", new DefaultClock()));
 	}
 
-	public StatisticsListener(Duration buildDuration,
-			SeriesMap targetSeriesMap, SeriesMap taskSeriesMap) {
-		this.buildDuration = buildDuration;
-		this.targetSeriesMap = targetSeriesMap;
-		this.taskSeriesMap = taskSeriesMap;
+	public StatisticsListener(Build build) {
+		this.build = build;
 	}
 
 	public void buildStarted(BuildEvent buildEvent) {
-		buildDuration.setStartTime(currentTime());
+		build.start();
 	}
 
 	public void buildFinished(BuildEvent buildEvent) {
-		buildDuration.setFinishTime(currentTime());
-		new StatisticsReport().print("Target Statistics", targetSeriesMap);
-		new StatisticsReport().print("Task Statistics", taskSeriesMap);
+		build.finish();
+		new StatisticsReport().print("Target Statistics", build
+				.toTargetSeriesMap());
+		new StatisticsReport()
+				.print("Task Statistics", build.toTaskSeriesMap());
 	}
 
 	public void targetStarted(BuildEvent buildEvent) {
 		String name = buildEvent.getTarget().getName();
-		setStartTimeToCurrentTime(targetSeriesMap, name);
+		build.getTarget(name).start();
 	}
 
 	public void targetFinished(BuildEvent buildEvent) {
 		String name = buildEvent.getTarget().getName();
-		setFinishTimeToCurrentTime(targetSeriesMap, name);
+		build.getTarget(name).finish();
 	}
 
 	public void taskStarted(BuildEvent buildEvent) {
 		String name = buildEvent.getTask().getTaskName();
-		setStartTimeToCurrentTime(taskSeriesMap, name);
+		build.getTask(name).start();
 	}
 
 	public void taskFinished(BuildEvent buildEvent) {
 		String name = buildEvent.getTask().getTaskName();
-		setFinishTimeToCurrentTime(taskSeriesMap, name);
+		build.getTask(name).finish();
 	}
 
 	public void messageLogged(BuildEvent buildEvent) {
 	}
 
-	protected long currentTime() {
-		return new Date().getTime();
-	}
-
 	public long getBuildTime() {
-		return buildDuration.getTime();
+		return build.getTime();
 	}
 
-	private void setStartTimeToCurrentTime(SeriesMap map, String name) {
-		Duration duration = new Duration();
-		duration.setStartTime(currentTime());
-		map.findSeries(name).add(duration);
+	public void subBuildFinished(BuildEvent buildEvent) {
 	}
 
-	private void setFinishTimeToCurrentTime(SeriesMap map, String name) {
-		Series series = map.findSeries(name);
-		series.setFinishTime(currentTime());
-	}
+	public void subBuildStarted(BuildEvent buildEvent) {
 
-	public void subBuildFinished(BuildEvent arg0) {
-		
-	}
-
-	public void subBuildStarted(BuildEvent arg0) {
-		
 	}
 
 }

@@ -21,7 +21,7 @@ public class StatisticsReport {
         long[] totalTimes = new long[table.rows() - 1];
         long runningTotalTime = 0;
         for (int i = 1; i < table.rows(); i++) {
-            Series series = seriesMap.getSeries(keys[i - 1]);
+            Series series = seriesMap.get(keys[i - 1]);
             table.put(i, IDX_NAME, keys[i - 1]);
             table.put(i, IDX_COUNT, String.valueOf(series.size()));
             table.put(i, IDX_AVERAGE, String.valueOf(series.getAverageTime()));

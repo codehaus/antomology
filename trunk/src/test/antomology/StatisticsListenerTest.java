@@ -11,35 +11,17 @@ import junit.framework.TestCase;
 
 public class StatisticsListenerTest extends TestCase {
 
-	private Duration buildDuration;
+	private Build build;
 
-	private SeriesMap targetSeriesMap;
-
-	private SeriesMap taskSeriesMap;
-
-	private Clock clock;
+	private StubClock clock;
 
 	private StatisticsListener listener;
 
-	public class Clock {
-		private long currentTime;
-
-		public long getCurrentTime() {
-			return currentTime;
-		}
-
-		public void setCurrentTime(long currentTime) {
-			this.currentTime = currentTime;
-		}
-	}
-
 	public void setUp() throws Exception {
 		super.setUp();
-		clock = new Clock();
-		buildDuration = new Duration();
-		targetSeriesMap = new SeriesMap();
-		taskSeriesMap = new SeriesMap();
-		listener = createTimerListener(clock);
+		clock = new StubClock();
+		build = new Build("main", clock);
+		listener = createTimerListener(build, clock);
 	}
 
 	public void testShouldCreateInstanceWithoutErrorAndInvokeMessageLogged() {
@@ -58,13 +40,9 @@ public class StatisticsListenerTest extends TestCase {
 		return new BuildEvent(createProject());
 	}
 
-	private StatisticsListener createTimerListener(final Clock c) {
-		return new StatisticsListener(buildDuration, targetSeriesMap,
-				taskSeriesMap) {
-			public long currentTime() {
-				return c.getCurrentTime();
-			}
-		};
+	private StatisticsListener createTimerListener(final Build build,
+			final Clock c) {
+		return new StatisticsListener(build);
 	}
 
 	public void testShouldCalculateDurationOfTarget() {
@@ -72,7 +50,7 @@ public class StatisticsListenerTest extends TestCase {
 		listener.targetStarted(createTargetBuildEvent("target"));
 		clock.setCurrentTime(100);
 		listener.targetFinished(createTargetBuildEvent("target"));
-		assertEquals(90, targetSeriesMap.getSeries("target").getTimes()[0]);
+		assertEquals(90, build.getTarget("target").getTime());
 	}
 
 	private BuildEvent createTargetBuildEvent(String name) {
@@ -86,7 +64,7 @@ public class StatisticsListenerTest extends TestCase {
 		listener.taskStarted(createTaskBuildEvent("antcall"));
 		clock.setCurrentTime(100);
 		listener.taskFinished(createTaskBuildEvent("antcall"));
-		assertEquals(90, taskSeriesMap.getSeries("antcall").getTimes()[0]);
+		assertEquals(90, build.getTask("antcall").getTime());
 	}
 
 	private Project createProject() {
@@ -108,8 +86,8 @@ public class StatisticsListenerTest extends TestCase {
 		clock.setCurrentTime(100);
 		listener.targetFinished(createTargetBuildEvent("target1"));
 		listener.targetFinished(createTargetBuildEvent("target2"));
-		assertEquals(90, targetSeriesMap.getSeries("target2").getTimes()[0]);
-		assertEquals(90, targetSeriesMap.getSeries("target1").getTimes()[0]);
+		assertEquals(90, build.getTarget("target2").getTime());
+		assertEquals(90, build.getTarget("target1").getTime());
 	}
 
 	public void testShouldCalculateDurationOfSameTwoTargets() {
@@ -120,7 +98,7 @@ public class StatisticsListenerTest extends TestCase {
 		listener.targetFinished(createTargetBuildEvent("target"));
 		clock.setCurrentTime(100);
 		listener.targetFinished(createTargetBuildEvent("target"));
-		long[] times = targetSeriesMap.getSeries("target").getTimes();
+		long[] times = build.getTarget("target").getSeries().getTimes();
 		assertEquals(2, times.length);
 		assertEquals(90, times[0]);
 		assertEquals(80, times[1]);
@@ -134,7 +112,7 @@ public class StatisticsListenerTest extends TestCase {
 		listener.taskFinished(createTaskBuildEvent("antcall"));
 		clock.setCurrentTime(100);
 		listener.taskFinished(createTaskBuildEvent("antcall"));
-		long[] times = taskSeriesMap.getSeries("antcall").getTimes();
+		long[] times = build.getTask("antcall").getSeries().getTimes();
 		assertEquals(2, times.length);
 		assertEquals(90, times[0]);
 		assertEquals(80, times[1]);
