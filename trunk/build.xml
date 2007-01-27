@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
 <project name="antomology" default="all" basedir=".">
 
 	<property file="build.properties" />
@@ -53,7 +52,7 @@
 		<mkdir dir="build/doc/junit" />
 		<delete file="build/doc/emma/coverage.emma" />
 
-		<junit printsummary="on" dir="${basedir}" failureproperty="junit-failure">
+		<junit forkMode="once" fork="true" printsummary="on" dir="${basedir}" failureproperty="junit-failure">
 			<classpath>
 				<pathelement location="build/classes-instr" />
 				<pathelement location="build/classes-test" />
@@ -62,7 +61,7 @@
 				<path location="build/dist/${ant.project.name}-bin-${project.version}.jar" />
 			</classpath>
 
-			<batchtest fork="true" todir="build/doc/junit">
+			<batchtest todir="build/doc/junit">
 				<formatter type="xml" />
 				<fileset dir="src/test">
 					<include name="**/*Test.java" />

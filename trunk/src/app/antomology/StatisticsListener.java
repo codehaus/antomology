@@ -2,63 +2,77 @@ package antomology;
 
 import org.apache.tools.ant.BuildEvent;
 import org.apache.tools.ant.SubBuildListener;
+import org.apache.tools.ant.Target;
+import org.apache.tools.ant.Task;
 
 public class StatisticsListener implements SubBuildListener {
 
-	private final Build build;
+	protected ProjectTimerMap projectTimerMap = new ProjectTimerMap();
+
+	private final Clock clock;
 
 	public StatisticsListener() {
-		this(new Build("main", new DefaultClock()));
+		this(new DefaultClock());
 	}
 
-	public StatisticsListener(Build build) {
-		this.build = build;
+	public StatisticsListener(Clock clock) {
+		this.clock = clock;
 	}
 
 	public void buildStarted(BuildEvent buildEvent) {
-		build.start();
+		findProjectTimer(buildEvent).start();
 	}
 
 	public void buildFinished(BuildEvent buildEvent) {
-		build.finish();
-		new StatisticsReport().print("Target Statistics", build
+		ProjectTimer projectTimer = findProjectTimer(buildEvent);
+		projectTimer.finish();
+		new StatisticsReport().print("Target Statistics", projectTimer
 				.toTargetSeriesMap());
-		new StatisticsReport()
-				.print("Task Statistics", build.toTaskSeriesMap());
+		new StatisticsReport().print("Task Statistics", projectTimer
+				.toTaskSeriesMap());
 	}
 
 	public void targetStarted(BuildEvent buildEvent) {
-		String name = buildEvent.getTarget().getName();
-		build.getTarget(name).start();
+		findTargetTimer(buildEvent).start();
 	}
 
 	public void targetFinished(BuildEvent buildEvent) {
-		String name = buildEvent.getTarget().getName();
-		build.getTarget(name).finish();
+		findTargetTimer(buildEvent).finish();
 	}
 
 	public void taskStarted(BuildEvent buildEvent) {
-		String name = buildEvent.getTask().getTaskName();
-		build.getTask(name).start();
+		findTaskTimer(buildEvent).start();
 	}
 
 	public void taskFinished(BuildEvent buildEvent) {
-		String name = buildEvent.getTask().getTaskName();
-		build.getTask(name).finish();
+		findTaskTimer(buildEvent).finish();
 	}
 
 	public void messageLogged(BuildEvent buildEvent) {
-	}
-
-	public long getBuildTime() {
-		return build.getTime();
 	}
 
 	public void subBuildFinished(BuildEvent buildEvent) {
 	}
 
 	public void subBuildStarted(BuildEvent buildEvent) {
+	}
 
+	private ProjectTimer findProjectTimer(BuildEvent buildEvent) {
+		return projectTimerMap.find(buildEvent.getProject(), clock);
+	}
+
+	private Timer findTargetTimer(BuildEvent buildEvent) {
+		ProjectTimer projectTimer = findProjectTimer(buildEvent);
+		final Target target = buildEvent.getTarget();
+		String name = target.getName();
+		return projectTimer.getTargetTimer(name);
+	}
+
+	private Timer findTaskTimer(BuildEvent buildEvent) {
+		ProjectTimer projectTimer = findProjectTimer(buildEvent);
+		final Task task = buildEvent.getTask();
+		String name = task.getTaskName();
+		return projectTimer.getTaskTimer(name);
 	}
 
 }

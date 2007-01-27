@@ -1,6 +1,6 @@
 package antomology;
 
-public class BuildElement {
+public class Timer {
 
 	protected final String name;
 
@@ -8,7 +8,7 @@ public class BuildElement {
 
 	protected final Clock clock;
 
-	public BuildElement(String name, Clock clock) {
+	public Timer(String name, Clock clock) {
 		this.name = name;
 		this.clock = clock;
 		series = new Series();

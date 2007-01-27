@@ -16,11 +16,8 @@ public class SeriesMap {
 		return (Series) map.get(name);
 	}
 
-	public Series find(String name) {
-		if (!map.containsKey(name)) {
-			map.put(name, new Series());
-		}
-		return (Series) map.get(name);
+	public void put(String key, Series series) {
+		map.put(key, series);
 	}
 
 }
