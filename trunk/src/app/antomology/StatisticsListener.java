@@ -48,9 +48,6 @@ public class StatisticsListener implements SubBuildListener {
 
 	public void taskFinished(BuildEvent buildEvent) {
 		findTaskTimer(buildEvent).finish();
-		System.out.println(findProjectTimer(buildEvent).getName() + " "
-				+ findTaskTimer(buildEvent).getName() + " "
-				+ findTaskTimer(buildEvent).getTime());
 	}
 
 	public void messageLogged(BuildEvent buildEvent) {
