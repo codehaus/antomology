@@ -51,10 +51,12 @@ public class StatisticsListener implements SubBuildListener {
 	public void messageLogged(BuildEvent buildEvent) {
 	}
 
-	public void subBuildFinished(BuildEvent buildEvent) {
+	public void subBuildStarted(BuildEvent buildEvent) {
+		findProjectTimer(buildEvent).start();
 	}
 
-	public void subBuildStarted(BuildEvent buildEvent) {
+	public void subBuildFinished(BuildEvent buildEvent) {
+		findProjectTimer(buildEvent).finish();
 	}
 
 	private ProjectTimer findProjectTimer(BuildEvent buildEvent) {
