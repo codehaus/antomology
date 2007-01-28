@@ -21,7 +21,7 @@ public class SeriesTest extends TestCase {
 		assertEquals(10, series.getAverageTime());
 		assertEquals(10, series.getTotalTime());
 	}
-	
+
 	public void testShouldReturnSameAverageAndTotalTimeForThreeDurations() {
 		Series series = new Series();
 		series.add(new Duration());
@@ -39,5 +39,17 @@ public class SeriesTest extends TestCase {
 		assertEquals(60, series.getTotalTime());
 	}
 
+	public void testShouldReturnLastStartedDuration() {
+		Series series = new Series();
+		final Duration duration = new Duration();
+		series.add(duration);
+		int expected = series.size();
+		assertSame(duration, series.current());
+		assertEquals(expected, series.size());
+		series.add(new Duration());
+		series.setFinishTime(10);
+		assertSame(duration, series.current());
+		assertEquals(expected + 1, series.size());
+	}
 
 }

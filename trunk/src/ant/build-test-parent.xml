@@ -1,0 +1,14 @@
+<project name="parent" default="all" basedir=".">
+
+	<target name="all" depends="first,second" />
+
+	<target name="first">
+		<echo>called first</echo>
+	</target>
+
+	<target name="second">
+		<echo>called second</echo>
+		<ant antfile="build-test-child.xml" />
+	</target>
+
+</project>

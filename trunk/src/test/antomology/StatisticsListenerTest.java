@@ -29,8 +29,7 @@ public class StatisticsListenerTest extends TestCase {
 		listener.buildStarted(buildEvent);
 		clock.setCurrentTime(100);
 		listener.buildFinished(buildEvent);
-		assertEquals(90, listener.projectTimerMap.get(buildEvent.getProject())
-				.getTime());
+		assertEquals(90, listener.findInitialProjectTimer().getTime());
 	}
 
 	public void testShouldCalculateDurationOfSubBuild() {
