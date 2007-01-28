@@ -46,4 +46,8 @@ public class Series {
 	public int size() {
 		return list.size();
 	}
+
+	public Duration current() {
+		return (Duration) stack.peek();
+	}
 }

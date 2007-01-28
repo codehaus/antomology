@@ -2,7 +2,7 @@ package antomology;
 
 public class Timer {
 
-	protected final String name;
+	protected String name;
 
 	protected final Series series;
 

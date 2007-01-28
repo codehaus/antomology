@@ -1,6 +1,7 @@
 package antomology;
 
 import org.apache.tools.ant.BuildEvent;
+import org.apache.tools.ant.Project;
 import org.apache.tools.ant.SubBuildListener;
 import org.apache.tools.ant.Target;
 import org.apache.tools.ant.Task;
@@ -11,6 +12,8 @@ public class StatisticsListener implements SubBuildListener {
 
 	private final Clock clock;
 
+	private final StatisticsReport statisticsReport = new StatisticsReport();
+
 	public StatisticsListener() {
 		this(new DefaultClock());
 	}
@@ -20,16 +23,15 @@ public class StatisticsListener implements SubBuildListener {
 	}
 
 	public void buildStarted(BuildEvent buildEvent) {
-		findProjectTimer(buildEvent).start();
+		// buildEvent.getProject().getName() has null value
+		findInitialProjectTimer().start();
 	}
 
 	public void buildFinished(BuildEvent buildEvent) {
 		ProjectTimer projectTimer = findProjectTimer(buildEvent);
-		projectTimer.finish();
-		new StatisticsReport().print("Target Statistics", projectTimer
-				.toTargetSeriesMap());
-		new StatisticsReport().print("Task Statistics", projectTimer
-				.toTaskSeriesMap());
+		updateDurationWithInitialProjectTimer(projectTimer);
+		buildFinished(projectTimer);
+		statisticsReport.print();
 	}
 
 	public void targetStarted(BuildEvent buildEvent) {
@@ -46,6 +48,9 @@ public class StatisticsListener implements SubBuildListener {
 
 	public void taskFinished(BuildEvent buildEvent) {
 		findTaskTimer(buildEvent).finish();
+		System.out.println(findProjectTimer(buildEvent).getName() + " "
+				+ findTaskTimer(buildEvent).getName() + " "
+				+ findTaskTimer(buildEvent).getTime());
 	}
 
 	public void messageLogged(BuildEvent buildEvent) {
@@ -56,11 +61,17 @@ public class StatisticsListener implements SubBuildListener {
 	}
 
 	public void subBuildFinished(BuildEvent buildEvent) {
-		findProjectTimer(buildEvent).finish();
+		ProjectTimer projectTimer = findProjectTimer(buildEvent);
+		buildFinished(projectTimer);
 	}
 
 	private ProjectTimer findProjectTimer(BuildEvent buildEvent) {
-		return projectTimerMap.find(buildEvent.getProject(), clock);
+		final Project project = buildEvent.getProject();
+		return projectTimerMap.find(project, clock);
+	}
+
+	protected ProjectTimer findInitialProjectTimer() {
+		return (ProjectTimer) projectTimerMap.find((String) null, clock);
 	}
 
 	private Timer findTargetTimer(BuildEvent buildEvent) {
@@ -77,4 +88,14 @@ public class StatisticsListener implements SubBuildListener {
 		return projectTimer.getTaskTimer(name);
 	}
 
+	private void buildFinished(ProjectTimer projectTimer) {
+		projectTimer.finish();
+		statisticsReport.push(projectTimer);
+	}
+
+	private void updateDurationWithInitialProjectTimer(ProjectTimer projectTimer) {
+		ProjectTimer rootProjectTimer = findInitialProjectTimer();
+		final Duration duration = rootProjectTimer.getSeries().current();
+		projectTimer.getSeries().add(duration);
+	}
 }

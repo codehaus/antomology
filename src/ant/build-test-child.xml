@@ -1,0 +1,16 @@
+<project name="child" default="all" basedir=".">
+
+	<target name="all" depends="three,four" />
+
+	<target name="three">
+		<echo>called three</echo>
+	</target>
+
+	<target name="four">
+		<echo>called four</echo>
+		<waitfor maxwait="5" maxwaitunit="millisecond">
+		        <http url="http://localhost/myapp/index.html"/>
+		</waitfor>
+	</target>
+
+</project>
