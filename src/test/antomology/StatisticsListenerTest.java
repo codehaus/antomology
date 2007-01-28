@@ -33,6 +33,17 @@ public class StatisticsListenerTest extends TestCase {
 				.getTime());
 	}
 
+	public void testShouldCalculateDurationOfSubBuild() {
+		clock.setCurrentTime(10);
+		final BuildEvent buildEvent = factory.createProjectBuildEvent();
+		listener.subBuildStarted(buildEvent);
+		clock.setCurrentTime(100);
+		listener.subBuildFinished(buildEvent);
+		final ProjectTimer projectTimer = listener.projectTimerMap
+				.get(buildEvent.getProject());
+		assertEquals(90, projectTimer.getTime());
+	}
+
 	public void testShouldCalculateDurationOfTarget() {
 		final BuildEvent projectBuildEvent = factory.createProjectBuildEvent();
 		listener.buildStarted(projectBuildEvent);
@@ -97,7 +108,8 @@ public class StatisticsListenerTest extends TestCase {
 		listener.targetFinished(targetBuildEvent);
 		final ProjectTimer projectTimer = listener.projectTimerMap
 				.get(projectBuildEvent.getProject());
-		long[] times = projectTimer.getTargetTimer("target").getSeries().getTimes();
+		long[] times = projectTimer.getTargetTimer("target").getSeries()
+				.getTimes();
 		assertEquals(2, times.length);
 		assertEquals(90, times[0]);
 		assertEquals(80, times[1]);
@@ -118,7 +130,8 @@ public class StatisticsListenerTest extends TestCase {
 		listener.taskFinished(taskBuildEvent);
 		final ProjectTimer projectTimer = listener.projectTimerMap
 				.get(projectBuildEvent.getProject());
-		long[] times = projectTimer.getTaskTimer("antcall").getSeries().getTimes();
+		long[] times = projectTimer.getTaskTimer("antcall").getSeries()
+				.getTimes();
 		assertEquals(2, times.length);
 		assertEquals(90, times[0]);
 		assertEquals(80, times[1]);
