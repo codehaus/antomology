@@ -95,26 +95,33 @@ public class StatisticsReport {
 	}
 
 	public void push(ProjectTimer projectTimer) {
-		final String targetValue = create("Target Statistics", projectTimer
-				.toTargetSeriesMap());
-		final String taskValue = create("Task Statistics", projectTimer
-				.toTaskSeriesMap());
-		push(targetValue, taskValue);
-	}
-
-	private void push(final String targetValue, final String taskValue) {
-		StringBuffer sb = new StringBuffer();
-		sb.append(targetValue);
-		sb.append("\n");
-		sb.append(taskValue);
-		stack.push(sb.toString());
+		stack.push(projectTimer);
 	}
 
 	public void print() {
+		SeriesMap projectSeriesMap = new SeriesMap();
+		StringBuffer sb = new StringBuffer();
 		while (!stack.isEmpty()) {
-			System.out.println();
-			System.out.println(stack.pop());
+			ProjectTimer projectTimer = (ProjectTimer) stack.pop();
+			projectSeriesMap.put(projectTimer.getName(), projectTimer
+					.getSeries());
+			sb.append(createTargetStatistics(projectTimer));
+			sb.append("\n");
+			sb.append(createTaskStatistics(projectTimer));
+			sb.append("\n");
 		}
+		System.out.println();
+		System.out.println(create("Project Statistics", projectSeriesMap));
+		System.out.println(sb.toString());
 	}
 
+	private String createTaskStatistics(ProjectTimer projectTimer) {
+		return create("Task Statistics - " + projectTimer.getName(),
+				projectTimer.toTaskSeriesMap());
+	}
+
+	private String createTargetStatistics(ProjectTimer projectTimer) {
+		return create("Target Statistics - " + projectTimer.getName(),
+				projectTimer.toTargetSeriesMap());
+	}
 }
