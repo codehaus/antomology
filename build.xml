@@ -11,4 +11,12 @@
 		</java>
 	</target>
 
+	<target name="clean">
+		<!-- do nothing until bamboo is fixed -->
+	</target>
+
+	<target name="test">
+		<antcall target="bootstrap" />
+	</target>
+
 </project>
