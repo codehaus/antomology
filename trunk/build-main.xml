@@ -1,0 +1,128 @@
+<project name="main" default="all" basedir="." xmlns:artifact="antlib:org.apache.maven.artifact.ant">
+
+	<!-- type definition for ant-maven tasks -->
+	<typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="urn:maven-artifact-ant">
+		<classpath>
+			<pathelement location="tools/maven/maven-artifact-ant-2.0.4-dep.jar" />
+		</classpath>
+	</typedef>
+
+	<!-- import pom.xml to use within build.xml -->
+	<artifact:pom id="maven.project" file="pom.xml" />
+	
+	<import file="src/ant/manifest.xml" />
+	<import file="src/ant/emma.xml" />
+
+	<path id="path.run.app">
+		<pathelement location="build/classes" />
+	</path>
+
+	<path id="path.compile.app">
+		<pathelement path="tools/ant/ant-1.6.3.jar" />
+	</path>
+
+	<path id="path.compile.test">
+		<pathelement location="build/classes" />
+		<pathelement location="build/classes-test" />
+		<path refid="path.compile.app" />
+		<pathelement path="tools/junit/junit-3.8.1.jar" />
+	</path>
+
+	<target name="all" depends="clean, test" description="build all" />
+
+	<target name="clean" description="cleanup all">
+		<delete>
+			<fileset dir="." includes="junit*.properties" />
+		</delete>
+		<delete dir="build" />
+	</target>
+
+	<target name="compile-app" description="compiles the application">
+		<mkdir dir="build/classes" />
+		<javac debug="on" srcdir="src/app" destdir="build/classes" classpathref="path.compile.app" />
+	</target>
+
+	<target name="compile-test" description="compiles the tests">
+		<mkdir dir="build/classes-test" />
+		<javac debug="on" srcdir="src/test" destdir="build/classes-test" classpathref="path.compile.test" />
+	</target>
+
+	<target name="test" depends="dist, compile-test">
+
+		<mkdir dir="build/classes-instr" />
+		<mkdir dir="build/doc/emma" />
+
+		<emma>
+			<instr instrpathref="path.run.app" destdir="build/classes-instr" metadatafile="build/doc/emma/metadata.emma" merge="true">
+			</instr>
+		</emma>
+
+		<mkdir dir="build/doc/junit" />
+		<delete file="build/doc/emma/coverage.emma" />
+
+		<junit forkMode="once" fork="true" printsummary="on" dir="${basedir}" failureproperty="junit-failure">
+			<classpath>
+				<pathelement location="build/classes-instr" />
+				<pathelement location="build/classes-test" />
+				<path refid="path.compile.test" />
+				<path refid="emma.lib" />
+				<path location="build/dist/${maven.project.artifactId}-${maven.project.version}.jar" />
+			</classpath>
+
+			<batchtest todir="build/doc/junit">
+				<formatter type="xml" />
+				<fileset dir="src/test">
+					<include name="**/*Test.java" />
+				</fileset>
+			</batchtest>
+
+			<jvmarg value="-Demma.coverage.out.file=${basedir}/build/doc/emma/coverage.emma" />
+			<jvmarg value="-Demma.coverage.out.merge=true" />
+
+		</junit>
+
+		<emma>
+			<report sourcepath="src/app" sort="+block,+name,+method,+class" metrics="method:70,block:80,line:80,class:100">
+				<fileset dir="build/doc/emma">
+					<include name="*.emma" />
+				</fileset>
+
+				<txt outfile="${basedir}/build/doc/emma/coverage.txt" depth="package" columns="class,method,block,line,name" />
+				<xml outfile="${basedir}/build/doc/emma/coverage.xml" depth="package" />
+				<html outfile="${basedir}/build/doc/emma/coverage.html" depth="method" columns="name,class,method,block,line" />
+			</report>
+		</emma>
+
+		<mkdir dir="build/doc/junit-reports" />
+
+		<junitreport todir="build/doc/junit-reports">
+			<fileset dir="build/doc/junit">
+				<include name="TEST-*.xml" />
+			</fileset>
+			<report format="frames" todir="build/doc/junit-reports/html" />
+		</junitreport>
+
+		<fail message="JUnit test(s) failed" if="junit-failure" />
+
+	</target>
+
+	<target name="dist" depends="compile-app">
+		<mkdir dir="build/meta-inf" />
+		<copy todir="build/meta-inf">
+			<fileset dir="src/metadata/meta-inf" />
+			<filterset>
+				<filter token="implementation.title" value="${implementation.title}" />
+				<filter token="implementation.version" value="${implementation.version}" />
+				<filter token="implementation.url" value="${implementation.url}" />
+			</filterset>
+		</copy>
+		<mkdir dir="build/dist" />
+		<jar destfile="build/dist/${maven.project.artifactId}-${maven.project.version}.jar" manifest="build/meta-inf/manifest.mf">
+			<fileset dir="build/classes">
+				<exclude name="**/test*/**" />
+				<exclude name="**/*Test.class" />
+			</fileset>
+		</jar>
+	</target>
+
+</project>
