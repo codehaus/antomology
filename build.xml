@@ -16,14 +16,15 @@
 	</target>
 
 	<target name="test">
-		<java classname="org.apache.tools.ant.Main" fork="true" failonerror="true">
+		<antcall target="bootstrap" />
+		<!--java classname="org.apache.tools.ant.Main" fork="true" failonerror="true">
 			<arg line="-Dant.home=${ant.home}" />
 			<arg line="-f build-ci.xml" />
 			<classpath>
 				<pathelement location="tools/maven/maven-artifact-ant-2.0.4-dep.jar" />
 				<pathelement path="${java.class.path}" />
 			</classpath>
-		</java>
+		</java-->
 	</target>
 
 </project>
