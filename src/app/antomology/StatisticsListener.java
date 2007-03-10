@@ -8,6 +8,8 @@ import org.apache.tools.ant.Task;
 
 public class StatisticsListener implements SubBuildListener {
 
+	private static final boolean BUILDEVENT_PROJECT_NAME_HAS_NULL_VALUE = true;
+
 	protected ProjectTimerMap projectTimerMap = new ProjectTimerMap();
 
 	private final Clock clock;
@@ -23,8 +25,9 @@ public class StatisticsListener implements SubBuildListener {
 	}
 
 	public void buildStarted(BuildEvent buildEvent) {
-		// buildEvent.getProject().getName() has null value
-		findInitialProjectTimer().start();
+		if (BUILDEVENT_PROJECT_NAME_HAS_NULL_VALUE) {
+			findInitialProjectTimer().start();
+		}
 	}
 
 	public void buildFinished(BuildEvent buildEvent) {
