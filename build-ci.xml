@@ -11,7 +11,7 @@
 	<artifact:pom id="maven.project" file="pom.xml" />
 
 	<!-- define deploy repository -->
-	<artifact:remoteRepository id="deploy.repository" url="http://snapshots.repository.codehaus.org" />
+	<artifact:remoteRepository id="deploy.repository" url="https://dav.codehaus.org/snapshots.dist/antomology" />
 
 	<property name="file.jar" location="build/dist/${maven.project.artifactId}-${maven.project.version}.jar" />
 
