@@ -1,30 +1,21 @@
-<project name="antomology-bootstrap" default="bootstrap" basedir=".">
-
-	<target name="bootstrap">
-		<java classname="org.apache.tools.ant.Main" fork="true" failonerror="true">
-			<arg line="-Dant.home=${ant.home}" />
-			<arg line="-f build-main.xml" />
-			<classpath>
-				<pathelement location="tools/maven/maven-artifact-ant-2.0.4-dep.jar" />
-				<pathelement path="${java.class.path}" />
-			</classpath>
-		</java>
-	</target>
+<project name="antomology-bootstrap" default="test" basedir=".">
+	
+	<property environment="env" />
+	
+	<condition property="maven.script" value=".bat">
+		<os family="windows" />
+    </condition>
 
 	<target name="clean">
-		<!-- do nothing until bamboo is fixed -->
+		<exec executable="${env.M2_HOME}/bin/mvn${maven.script}">
+			<arg value="clean"/>
+		</exec>
 	</target>
 
 	<target name="test">
-		<antcall target="bootstrap" />
-		<!--java classname="org.apache.tools.ant.Main" fork="true" failonerror="true">
-			<arg line="-Dant.home=${ant.home}" />
-			<arg line="-f build-ci.xml" />
-			<classpath>
-				<pathelement location="tools/maven/maven-artifact-ant-2.0.4-dep.jar" />
-				<pathelement path="${java.class.path}" />
-			</classpath>
-		</java-->
+		<exec executable="${env.M2_HOME}/bin/mvn${maven.script}">
+			<arg value="test"/>
+		</exec>
 	</target>
 
 </project>

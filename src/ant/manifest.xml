@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="ISO-8859-1"?>
-<project>
-
-    <!-- MANIFEST.MF properties -->
-	<property name="implementation.title" value="${maven.project.name}" />
-	<property name="implementation.version" value="${maven.project.version}" />
-	<property name="implementation.url" value="${maven.project.url}" />
-
-</project>
