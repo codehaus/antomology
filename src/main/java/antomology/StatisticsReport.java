@@ -16,9 +16,10 @@ public class StatisticsReport {
 	private static final int IDX_PERCENTAGE = 4;
 
 	private static final String[] HEADERS = new String[] { "name", "count",
-			"avg (ms)", "total (ms)", "%" };
+			"average", "total", "%" };
 
 	private static final StringFormatter FORMATTER = new StringFormatter();
+	private static final TimeFormatter TIME_FORMATTER = new TimeFormatter();
 
 	private final Stack stack = new Stack();
 
@@ -33,8 +34,8 @@ public class StatisticsReport {
 			Series series = seriesMap.get(keys[i - 1]);
 			table.put(i, IDX_NAME, keys[i - 1]);
 			table.put(i, IDX_COUNT, String.valueOf(series.size()));
-			table.put(i, IDX_AVERAGE, String.valueOf(series.getAverageTime()));
-			table.put(i, IDX_TOTAL, String.valueOf(series.getTotalTime()));
+			table.put(i, IDX_AVERAGE, TIME_FORMATTER.format(series.getAverageTime()));
+			table.put(i, IDX_TOTAL, TIME_FORMATTER.format(series.getTotalTime()));
 			totalTimes[i - 1] = series.getTotalTime();
 			runningTotalTime += series.getTotalTime();
 		}
@@ -44,7 +45,7 @@ public class StatisticsReport {
 
 		return toString(title, table);
 	}
-
+	
 	private void updateTableWithPercentagesOfTotalTime(Table table,
 			long[] totalTimes, long runningTotalTime) {
 		for (int i = 0; i < totalTimes.length; i++) {
